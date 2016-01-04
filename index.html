@@ -4,16 +4,60 @@
     <link rel="stylesheet" type="text/css" href="assets/css/style.css">
     <title>Basic Site</title>
     <script src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
-    <script src="assets/javascript/artshare-api-wrapper.js"></script>
     <script src="assets/javascript/script.js"></script>
   </head>
   <body>
-    <h1>Basic Site</h1>
-    <a href="page2.html">Page 2</a>
+    <h1>Art Share</h1>
     <div class="error">
     </div>
-    <button class="addUser">add user</button>
-    <ul class="allUsers">
-    </ul>
+    <div>
+      <h2>Users</h2>
+      <div class="flex-wrapper">
+        <form id="add-user" class="width-half">
+          <label>
+            First Name
+            <input type="text" id="new-user-fname" />
+          </label>
+          <label>
+            Last Name
+            <input type="text" id="new-user-lname" />
+          </label>
+          <label>
+            Email
+            <input type="text" id="new-user-email" />
+          </label>
+          <label>
+            Password
+            <input type="password" id="new-user-password" />
+          </label>
+          <input type="submit" value="Create User" />
+        </form>
+        <ul class="all-users width-half">
+        </ul>
+      </div>
+    </div>
+    <div>
+      <h2>Session</h2>
+      <div class="flex-wrapper">
+        <form id="sign-in" class="width-half">
+          <h3>Sign In</h3>
+          <label>
+            Email
+            <input type="text" id="login-email" />
+          </label>
+          <label>
+            Password
+            <input type="text" id="login-password" />
+          </label>
+          <input type="submit" value="Sign In" />
+        </form>
+        <div class="current-user width-half">
+          <h3>Current User</h3>
+          <div class="current-user-info">
+            No user logged in.
+          </div>
+        </div>
+      </div>
+    </div>
   </body>
 </html>

@@ -1,38 +1,72 @@
+// Domain Objects
+
+var User = {
+  init: function(props) {
+    this.fname = props.fname;
+    this.lname = props.lname;
+    this.email = props.email;
+    this.password = props.password;
+    this.id = props.id;
+    return this;
+  },
+
+  logInfo: function() {
+    return this.id + " " + this.email + this.fname + " " + this.lname;
+  },
+
+  toJSON: function() {
+    return {
+      fname: this.fname,
+      lname: this.lname,
+      email: this.email,
+      password: this.password
+    }
+  }
+}
+
+// Current User
+
+var currentUser = null;
+
 $(document).ready(function() {
 
+  // Create a new user.
+  $('#add-user').on('submit', function(event) {
+    event.preventDefault();
 
+    var userParams = {
+      fname: $('#new-user-fname').val(),
+      lname: $('#new-user-lname').val(),
+      email: $('#new-user-email').val(),
+      password: $('#new-user-password').val()
+    }
+    var user = User.init(userParams);
 
-
-  $('.addUser').on('click', function() {
     $.ajax({
       type: "POST",
       url: "http://art-share.herokuapp.com/api/v1/users/",
       data:{
-        user: {
-          fname: "Gob5",
-          lname: "Bluth5",
-          password: "testpass",
-          email: "gob5@example.com"
-        }
+        user: user.toJSON()
       },
       success: function(response) {
-        // console.log(response);
-        var user = response.result;
-        $('.allUsers').append("<li>" + user.id + " " + user.email + ": " + user.fname + " " + user.lname + "<button class='deleteUser' data-id='" + user.id + "'>delete</button></li>");
+        var user = User.init(response.result);
+        $('.all-users').prepend("<li>" + user.logInfo() + "<button class='deleteUser' data-id='" + user.id + "'>delete</button></li>");
       }
     });
+
+    $(event.target)[0].reset();
   });
 
+  // Fetch all users.
   $.ajax({
     type: "GET",
     url: "http://art-share.herokuapp.com/api/v1/users/",
     success: function(response) {
-      // console.log(response);
-      var allUsers = response.result;
+      var allUsers = response.result.reverse();
 
       for(var i = 0; i < allUsers.length; i++) {
-        var user = allUsers[i];
-        $('.allUsers').append("<li>" + user.id + " " + user.email + ": " + user.fname + " " + user.lname + "<button class='deleteUser' data-id='" + user.id + "'>delete</button></li>");
+        var user = User.init(allUsers[i]);
+        $('.all-users').append("<li>" + user.logInfo() + "<button class='deleteUser' data-id='" + user.id + "'>delete</button></li>");
       }
     },
     error: function(response) {
@@ -40,6 +74,7 @@ $(document).ready(function() {
     }
   });
 
+  // Destroy user.
   $(document).on('click', '.deleteUser', function(event) {
     var id = $(event.target).data('id');
     $.ajax({
@@ -48,85 +83,32 @@ $(document).ready(function() {
       success: function(response) {
         // Find the user <li> in the list and hide it
         $('[data-id=' + id + ']').parent().hide();
-
-        // Or, rerender the whole list
-
-        //$('.allUsers').html('');
-        //
-        // $.ajax({
-        //   type: "GET",
-        //   url: "http://art-share.herokuapp.com/api/v1/users/",
-        //   success: function(response) {
-        //     // console.log(response);
-        //     var allUsers = response.result;
-        //
-        //     for(var i = 0; i < allUsers.length; i++) {
-        //       var user = allUsers[i];
-        //       $('.allUsers').append("<li>" + user.id + " " + user.email + ": " + user.fname + " " + user.lname + "<button class='deleteUser' data-id='" + user.id + "'>delete</button></li>");
-        //     }
-        //   },
-        //   error: function(response) {
-        //     $('.error').text("Something went wrong " + response.responseText);
-        //   }
-        // });
       }
     });
   });
 
-  //
-  // returnUsers(function(response) {
-  //   console.log(response);
-  //   console.log(response.result[0].email);
-  //   var allUsers = response.result;
-  //
-  //   for(var i = 0; i < allUsers.length; i++) {
-  //     var user = allUsers[i];
-  //     $('.allUsers').append("<li>" + user.email + ": " + user.fname + " " + user.lname + "</li>");
-  //   }
-  // });
+  // Sign in
+  $(document).on('submit', '#sign-in', function(event) {
+    event.preventDefault();
+    var email = $('#login-email').val();
+    var password = $('#login-password').val();
+    console.log(email, password);
 
+    $.ajax({
+      type: 'POST',
+      url: 'http://art-share.herokuapp.com/api/v1/sessions/new',
+      data: {
+        email: email,
+        password: password
+      }
+    }).success(function(response) {
+      console.log(response.result);
+      var user = User.init(response.result);
 
+      // Set global current user.
+      currentUser = user;
 
-
-
-
+      $('.current-user-info').text(currentUser.logInfo());
+    });
+  });
 });
-
-
-
-// $.ajax({
-//   type: "GET",
-//   url: "http://nycda.com/",
-//   success: function(response) {
-//     console.log(response);
-//   }
-// });
-//
-//
-//
-// var person = {
-//   firstName: 'lucille',
-//   lastName: 'bluth',
-//   combinedName: 'bluth Lucille',
-//   someBehavior: function() {
-//     var sum = 1 + 1;
-//     console.log(sum + ' woo!');
-//   },
-//   coolNumber: 999,
-//   aListOfThings: [1, 2, 3, 4],
-//   nestedObject: {
-//     pizza: 'great',
-//     toppings: {
-//       roni: 'lots, please'
-//     }
-//   },
-//   "height": 12,
-// };
-//
-// // console.log(person);
-//
-// var json = JSON.stringify(person);
-// // console.log(json);
-//
-// var newObject = JSON.parse(json);
-// // console.log(newObject);
