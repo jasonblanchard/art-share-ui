@@ -1,5 +1,4 @@
 // Domain Objects
-
 var User = {
   init: function(props) {
     this.fname = props.fname;
@@ -24,8 +23,23 @@ var User = {
   }
 }
 
-// Current User
+var Painting = {
+  init: function(props) {
+    this.name = props.name;
+    this.image_url = props.image_url;
+    this.id = props.id;
+    return this;
+  },
 
+  toJSON: function() {
+    return {
+      name: this.name,
+      image_url: this.image_url
+    }
+  }
+}
+
+// Current User
 var currentUser = null;
 
 $(document).ready(function() {
@@ -92,7 +106,6 @@ $(document).ready(function() {
     event.preventDefault();
     var email = $('#login-email').val();
     var password = $('#login-password').val();
-    console.log(email, password);
 
     $.ajax({
       type: 'POST',
@@ -102,7 +115,6 @@ $(document).ready(function() {
         password: password
       }
     }).success(function(response) {
-      console.log(response.result);
       var user = User.init(response.result);
 
       // Set global current user.
@@ -110,5 +122,50 @@ $(document).ready(function() {
 
       $('.current-user-info').text(currentUser.logInfo());
     });
+  });
+
+  // Get current user's pantings.
+  $(document).on('click', '#get-current-paintings', function() {
+    $.ajax({
+      type: 'GET',
+      url: 'http://art-share.herokuapp.com/api/v1/users/' + currentUser.id + '/paintings/'
+    }).success(function(response) {
+
+      var paintings = response.result;
+
+      for (var i = 0; i < paintings.length; i++) {
+        var painting = Painting.init(paintings[i]);
+        $('.paintings').append("<div class='image' data-id='" + painting.id + "'><img alt='" + painting.name + "' src='" + painting.image_url + "' /></div>");
+      }
+
+    }).error(function(response) {
+      console.log('error: ', response);
+    });
+  });
+
+  // Add painting.
+  $(document).on('submit', '#add-painting', function(event) {
+    event.preventDefault();
+
+    var paintingParams = {
+      name: $('#painting-name').val(),
+      image_url: $('#painting-url').val()
+    };
+
+    var painting = Painting.init(paintingParams);
+
+    $.ajax({
+      type: 'POST',
+      url: 'http://art-share.herokuapp.com/api/v1/users/' + currentUser.id + '/paintings/',
+      data: {
+        painting: painting.toJSON()
+      }
+    }).success(function(response) {
+
+    }).error(function(error) {
+      console.log('Error: ', error);
+    });
+
+    $(event.target)[0].reset();
   });
 });
