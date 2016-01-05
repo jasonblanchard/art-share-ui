@@ -138,7 +138,8 @@ $(document).ready(function() {
       var paintings = response.result;
 
       for (var i = 0; i < paintings.length; i++) {
-        var painting = Painting.init(paintings[i]);
+        var painting = Object.create(Painting);
+        Painting.init(paintings[i]);
         $('.paintings').append("<div class='image' data-id='" + painting.id + "'><img alt='" + painting.name + "' src='" + painting.image_url + "' /></div>");
       }
 
@@ -156,7 +157,8 @@ $(document).ready(function() {
       image_url: $('#painting-url').val()
     };
 
-    var painting = Painting.init(paintingParams);
+    var painting = Object.create(Painting);
+    Painting.init(paintingParams);
 
     $.ajax({
       type: 'POST',
