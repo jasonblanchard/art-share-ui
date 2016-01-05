@@ -13,7 +13,7 @@ var User = {
     return this.id + " " + this.email + this.fname + " " + this.lname;
   },
 
-  toJSON: function() {
+  serialize: function() {
     return {
       fname: this.fname,
       lname: this.lname,
@@ -31,7 +31,7 @@ var Painting = {
     return this;
   },
 
-  toJSON: function() {
+  serialize: function() {
     return {
       name: this.name,
       image_url: this.image_url
@@ -54,16 +54,18 @@ $(document).ready(function() {
       email: $('#new-user-email').val(),
       password: $('#new-user-password').val()
     }
-    var user = User.init(userParams);
+    var user = Object.create(User);
+    User.init(userParams);
 
     $.ajax({
       type: "POST",
       url: "http://art-share.herokuapp.com/api/v1/users/",
       data:{
-        user: user.toJSON()
+        user: user.serialize()
       },
       success: function(response) {
-        var user = User.init(response.result);
+        var user = Object.create(User);
+        User.init(response.result);
         $('.all-users').prepend("<li>" + user.logInfo() + "<button class='deleteUser' data-id='" + user.id + "'>delete</button></li>");
       }
     });
@@ -79,7 +81,8 @@ $(document).ready(function() {
       var allUsers = response.result.reverse();
 
       for(var i = 0; i < allUsers.length; i++) {
-        var user = User.init(allUsers[i]);
+        var user = Object.create(User);
+        User.init(allUsers[i]);
         $('.all-users').append("<li>" + user.logInfo() + "<button class='deleteUser' data-id='" + user.id + "'>delete</button></li>");
       }
     },
@@ -115,7 +118,8 @@ $(document).ready(function() {
         password: password
       }
     }).success(function(response) {
-      var user = User.init(response.result);
+      var user = Object.create(User);
+      User.init(response.result);
 
       // Set global current user.
       currentUser = user;
@@ -158,7 +162,7 @@ $(document).ready(function() {
       type: 'POST',
       url: 'http://art-share.herokuapp.com/api/v1/users/' + currentUser.id + '/paintings/',
       data: {
-        painting: painting.toJSON()
+        painting: painting.serialize()
       }
     }).success(function(response) {
 
